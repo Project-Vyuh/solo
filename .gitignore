@@ -1,0 +1,26 @@
+# Solo product documents (internal only, never push to remote)
+SOLO.md
+SOLO-WEBSITE.md
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Astro
+website/dist/
+website/.astro/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.*
+!.env.example

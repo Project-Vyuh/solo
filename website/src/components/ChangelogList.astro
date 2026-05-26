@@ -1,0 +1,60 @@
+---
+import { getCollection } from 'astro:content';
+import ChangelogCard from './ChangelogCard.astro';
+import { Icon } from 'astro-icon/components';
+import { url } from '../lib/utils';
+
+interface Props {
+  limit?: number;
+}
+
+const { limit = 5 } = Astro.props;
+
+const allEntries = await getCollection('changelog');
+const sortedEntries = allEntries.sort(
+  (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
+);
+const entries = sortedEntries.slice(0, limit);
+const hasMore = sortedEntries.length > limit;
+---
+
+<section id="changelog" class="px-6 py-24">
+  <div class="mx-auto max-w-prose">
+    <h2 class="text-2xl font-semibold tracking-tight text-foreground mb-8">
+      Latest Changes
+    </h2>
+
+    {entries.length > 0 ? (
+      <div class="space-y-3">
+        {entries.map((entry) => (
+          <ChangelogCard
+            id={entry.id}
+            version={entry.data.version}
+            title={entry.data.title}
+            date={entry.data.date}
+            summary={entry.data.summary}
+            categories={entry.data.categories}
+          />
+        ))}
+      </div>
+    ) : (
+      <div class="text-center py-12 border border-dashed border-line rounded-lg">
+        <p class="text-muted-foreground text-sm">
+          No changelog entries yet. The first release is coming soon.
+        </p>
+      </div>
+    )}
+
+    {hasMore && (
+      <div class="mt-6 text-center">
+        <a
+          href={url('/changelog/')}
+          class="inline-flex items-center gap-1.5 text-sm text-accent hover:text-accent-hover transition-colors"
+        >
+          View all changelogs
+          <Icon name="lucide:arrow-right" class="w-4 h-4" />
+        </a>
+      </div>
+    )}
+  </div>
+</section>

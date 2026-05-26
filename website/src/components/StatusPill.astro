@@ -1,0 +1,19 @@
+---
+interface Props {
+  label?: string;
+}
+
+const { label = 'In Development' } = Astro.props;
+---
+
+<span
+  class="inline-flex items-center gap-2 text-xs font-medium px-3 py-1 rounded-full border border-accent/30 text-accent bg-accent/5"
+>
+  <span class="relative flex h-1.5 w-1.5">
+    <span
+      class="absolute inline-flex h-full w-full rounded-full bg-accent opacity-75 animate-ping"
+    ></span>
+    <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-accent"></span>
+  </span>
+  {label}
+</span>

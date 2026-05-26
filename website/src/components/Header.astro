@@ -1,0 +1,51 @@
+---
+import { Icon } from 'astro-icon/components';
+import { url } from '../lib/utils';
+---
+
+<header
+  class="fixed top-0 left-0 right-0 z-50 border-b border-line bg-background/80 backdrop-blur-lg"
+>
+  <nav class="mx-auto max-w-prose px-6 h-14 flex items-center justify-between">
+    <a href={url('/')} class="text-foreground font-semibold tracking-tight text-lg">
+      Solo
+    </a>
+
+    <div class="flex items-center gap-6">
+      <a
+        href={url('/#changelog')}
+        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+      >
+        Changelog
+      </a>
+      <a
+        href={url('/#contribute')}
+        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+      >
+        Contribute
+      </a>
+
+      <div class="flex items-center gap-3 pl-3 border-l border-line">
+        <button
+          id="theme-toggle"
+          type="button"
+          aria-label="Toggle dark mode"
+          class="text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <Icon name="lucide:sun" class="w-4 h-4 hidden dark:block" />
+          <Icon name="lucide:moon" class="w-4 h-4 block dark:hidden" />
+        </button>
+
+        <a
+          href="https://github.com/Project-Vyuh/solo"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Solo on GitHub"
+          class="text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <Icon name="lucide:github" class="w-4 h-4" />
+        </a>
+      </div>
+    </div>
+  </nav>
+</header>

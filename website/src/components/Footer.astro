@@ -1,0 +1,40 @@
+---
+import { Icon } from 'astro-icon/components';
+---
+
+<footer class="border-t border-line px-6 py-8">
+  <div class="mx-auto max-w-prose flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div class="flex items-center gap-4 text-xs text-muted-foreground">
+      <span>Solo</span>
+      <span aria-hidden="true" class="text-line">·</span>
+      <a
+        href="https://github.com/Project-Vyuh/solo/blob/main/LICENSE"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="hover:text-foreground transition-colors"
+      >
+        Apache 2.0
+      </a>
+      <span aria-hidden="true" class="text-line">·</span>
+      <a
+        href="https://github.com/Project-Vyuh"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="hover:text-foreground transition-colors"
+      >
+        Project Vyuh
+      </a>
+    </div>
+    <div class="flex items-center gap-3">
+      <a
+        href="https://github.com/Project-Vyuh/solo"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Solo on GitHub"
+        class="text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <Icon name="lucide:github" class="w-4 h-4" />
+      </a>
+    </div>
+  </div>
+</footer>

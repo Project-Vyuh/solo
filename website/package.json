@@ -1,0 +1,19 @@
+{
+  "name": "solo-website",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "astro": "^5.0.0",
+    "@astrojs/tailwind": "^6.0.0",
+    "tailwindcss": "^3.4.0",
+    "astro-icon": "^1.1.0",
+    "@iconify-json/lucide": "^1.2.0",
+    "@fontsource-variable/inter": "^5.0.0"
+  }
+}

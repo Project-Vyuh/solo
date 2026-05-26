@@ -1,0 +1,77 @@
+---
+import { Icon } from 'astro-icon/components';
+
+const pathways = [
+  {
+    icon: 'lucide:terminal',
+    title: 'Set Up Development',
+    description: 'Clone, build, and run Solo locally from the GitHub repository.',
+    href: 'https://github.com/Project-Vyuh/solo#getting-started',
+  },
+  {
+    icon: 'lucide:search',
+    title: 'Pick an Issue',
+    description: 'Browse open issues labeled "good first issue" or "help wanted".',
+    href: 'https://github.com/Project-Vyuh/solo/issues',
+  },
+  {
+    icon: 'lucide:box',
+    title: 'Build a Skill',
+    description: 'Create and share automation skills for apps Solo doesn\'t support yet.',
+    href: 'https://github.com/Project-Vyuh/solo/blob/main/CONTRIBUTING.md',
+  },
+  {
+    icon: 'lucide:flask-conical',
+    title: 'Research',
+    description: 'Contribute to novel research in behavior modeling, skill generation, and on-device AI.',
+    href: 'https://github.com/Project-Vyuh/solo/blob/main/SOLO.md#11-novel-research-agenda',
+  },
+];
+---
+
+<section id="contribute" class="px-6 py-24">
+  <div class="mx-auto max-w-prose">
+    <h2 class="text-2xl font-semibold tracking-tight text-foreground mb-4">
+      Contribute
+    </h2>
+
+    <p class="text-muted-foreground leading-relaxed mb-8 max-w-lg">
+      Solo is completely open-source. Every line of code, every model configuration,
+      every skill definition &mdash; open for anyone to inspect, modify, and improve.
+    </p>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      {pathways.map((item) => (
+        <a
+          href={item.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="group p-5 rounded-lg border border-line bg-card hover:border-accent/50 transition-all"
+        >
+          <Icon
+            name={item.icon}
+            class="w-5 h-5 text-accent mb-3"
+          />
+          <h3 class="text-sm font-semibold text-card-foreground mb-1.5">
+            {item.title}
+          </h3>
+          <p class="text-xs text-muted-foreground leading-relaxed">
+            {item.description}
+          </p>
+        </a>
+      ))}
+    </div>
+
+    <div class="mt-8">
+      <a
+        href="https://github.com/Project-Vyuh/solo"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium rounded-lg bg-accent text-accent-foreground hover:bg-accent-hover transition-colors"
+      >
+        <Icon name="lucide:github" class="w-4 h-4" />
+        View on GitHub
+      </a>
+    </div>
+  </div>
+</section>

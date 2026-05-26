@@ -1,0 +1,42 @@
+---
+import { Icon } from 'astro-icon/components';
+import StatusPill from './StatusPill.astro';
+---
+
+<section class="px-6 pt-36 pb-24 text-center">
+  <div class="mx-auto max-w-prose">
+    <h1 class="text-5xl font-bold tracking-tight text-foreground mb-4">
+      Solo
+    </h1>
+
+    <div class="flex justify-center mb-6">
+      <StatusPill />
+    </div>
+
+    <p class="text-lg leading-relaxed text-muted-foreground max-w-lg mx-auto mb-10">
+      The most capable AI agent that lives entirely on your phone.
+      On-device. Private. Autonomous. Open-source.
+    </p>
+
+    <div class="flex items-center justify-center gap-4">
+      <a
+        href="https://github.com/Project-Vyuh/solo"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium rounded-lg bg-accent text-accent-foreground hover:bg-accent-hover transition-colors"
+      >
+        <Icon name="lucide:github" class="w-4 h-4" />
+        GitHub
+      </a>
+      <a
+        href="https://github.com/Project-Vyuh/solo/blob/main/SOLO.md"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium rounded-lg border border-line text-foreground hover:bg-muted transition-colors"
+      >
+        Read the Vision
+        <Icon name="lucide:arrow-right" class="w-4 h-4" />
+      </a>
+    </div>
+  </div>
+</section>

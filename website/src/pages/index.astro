@@ -1,0 +1,18 @@
+---
+import Base from '../layouts/Base.astro';
+import Header from '../components/Header.astro';
+import Hero from '../components/Hero.astro';
+import ChangelogList from '../components/ChangelogList.astro';
+import Contribute from '../components/Contribute.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Base>
+  <Header />
+  <main>
+    <Hero />
+    <ChangelogList limit={5} />
+    <Contribute />
+  </main>
+  <Footer />
+</Base>

@@ -1,0 +1,74 @@
+---
+import Base from './Base.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { Icon } from 'astro-icon/components';
+import { url } from '../lib/utils';
+
+interface Props {
+  version: string;
+  title: string;
+  date: string;
+  categories: string[];
+}
+
+const { version, title, date, categories } = Astro.props;
+const pageTitle = `${version} — ${title} | Solo`;
+
+const formattedDate = new Date(date).toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+
+const compareUrl = `https://github.com/Project-Vyuh/solo/releases/tag/${version}`;
+---
+
+<Base title={pageTitle}>
+  <Header />
+  <main class="px-6 pt-32 pb-24">
+    <article class="mx-auto max-w-prose">
+      <a
+        href={url('/#changelog')}
+        class="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-accent transition-colors mb-10"
+      >
+        <Icon name="lucide:arrow-left" class="w-4 h-4" />
+        Back to changelog
+      </a>
+
+      <header class="mb-10">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="text-sm font-mono text-accent">{version}</span>
+          <span class="text-sm text-muted-foreground">{formattedDate}</span>
+        </div>
+        <h1 class="text-3xl font-bold tracking-tight text-foreground">
+          {title}
+        </h1>
+        <div class="flex gap-2 mt-4">
+          {categories.map((cat) => (
+            <span class="text-xs font-medium px-2 py-0.5 rounded-full border border-line text-muted-foreground">
+              {cat}
+            </span>
+          ))}
+        </div>
+      </header>
+
+      <div class="border-t border-line pt-8 prose-changelog">
+        <slot />
+      </div>
+
+      <div class="border-t border-line mt-12 pt-6">
+        <a
+          href={compareUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-accent transition-colors"
+        >
+          View release on GitHub
+          <Icon name="lucide:arrow-up-right" class="w-3.5 h-3.5" />
+        </a>
+      </div>
+    </article>
+  </main>
+  <Footer />
+</Base>

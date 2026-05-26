@@ -1,0 +1,66 @@
+name: Generate Changelog from Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  generate-changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Generate changelog entry
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_NAME: ${{ github.event.release.name }}
+          RELEASE_BODY: ${{ github.event.release.body }}
+          RELEASE_DATE: ${{ github.event.release.published_at }}
+        run: |
+          DATE=$(echo "$RELEASE_DATE" | cut -d'T' -f1)
+          SLUG=$(echo "$RELEASE_NAME" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | tr -cd 'a-z0-9-')
+          FILENAME="website/src/content/changelog/${DATE}-${SLUG}.md"
+
+          # Detect categories from release body
+          CATEGORIES="[\"Added\"]"
+          if echo "$RELEASE_BODY" | grep -qi "fix"; then
+            CATEGORIES="[\"Added\", \"Fixed\"]"
+          fi
+          if echo "$RELEASE_BODY" | grep -qi "changed\|breaking"; then
+            CATEGORIES="[\"Added\", \"Changed\"]"
+          fi
+
+          # Extract first line as summary
+          SUMMARY=$(echo "$RELEASE_BODY" | head -1 | sed 's/[#*]//g' | xargs)
+          if [ -z "$SUMMARY" ]; then
+            SUMMARY="Release ${RELEASE_TAG}"
+          fi
+
+          cat > "$FILENAME" << HEREDOC
+          ---
+          version: "${RELEASE_TAG}"
+          title: "${RELEASE_NAME}"
+          date: "${DATE}"
+          summary: "${SUMMARY}"
+          categories: ${CATEGORIES}
+          ---
+
+          ${RELEASE_BODY}
+          HEREDOC
+
+          # Remove leading whitespace from heredoc
+          sed -i 's/^          //' "$FILENAME"
+
+      - name: Commit changelog entry
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add website/src/content/changelog/
+          git diff --staged --quiet || git commit -m "Add changelog entry for ${{ github.event.release.tag_name }}"
+          git push
