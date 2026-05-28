@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="solo_background">#FF09090B</color>
+    <color name="solo_foreground">#FFFAFAFA</color>
+    <color name="solo_accent">#FFA78BFA</color>
+</resources>

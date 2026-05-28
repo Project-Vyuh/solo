@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Solo</string>
+    <string name="onboarding_title">Solo</string>
+    <string name="onboarding_status">In Development</string>
+    <string name="onboarding_description">The most capable AI agent that lives entirely on your phone. On-device. Private. Autonomous.</string>
+    <string name="onboarding_download">Download Model</string>
+    <string name="chat_hint">Message Solo…</string>
+    <string name="chat_thinking">Thinking…</string>
+</resources>
