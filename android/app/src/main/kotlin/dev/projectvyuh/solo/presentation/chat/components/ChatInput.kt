@@ -40,6 +40,8 @@ fun ChatInput(
     onValueChange: (String) -> Unit,
     onSend: () -> Unit,
     onStop: () -> Unit,
+    onMicTap: () -> Unit,
+    voiceButtonState: VoiceButtonState,
     isGenerating: Boolean,
     isModelReady: Boolean,
     modifier: Modifier = Modifier,
@@ -51,6 +53,12 @@ fun ChatInput(
         verticalAlignment = Alignment.Bottom,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
+        // Mic button — left of the input field. Hidden when the text field has
+        // content (the user is composing a typed message; mic re-appears when
+        // they clear the text).
+        if (value.isEmpty() && !isGenerating) {
+            VoiceButton(state = voiceButtonState, onTap = onMicTap)
+        }
         Box(
             modifier = androidx.compose.ui.Modifier
                 .weight(1f)
