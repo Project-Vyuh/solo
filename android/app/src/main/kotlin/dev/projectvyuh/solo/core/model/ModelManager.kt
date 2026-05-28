@@ -49,8 +49,25 @@ class ModelManager @Inject constructor(
 
     private fun partialFile(def: ModelDefinition): File = File(modelsDir, def.partialFileName)
 
+    /** For archive-format models, the directory the contents were extracted into. */
+    fun extractDir(def: ModelDefinition): File = File(modelsDir, def.extractDirName)
+
     /** Current install state, recomputed from disk. Cheap (only stats files). */
     fun stateOf(def: ModelDefinition): ModelInstallState {
+        // Archive formats: "installed" means the extracted dir exists and is
+        // non-empty; the archive file itself is deleted after extraction.
+        if (def.format.isArchive) {
+            val dir = extractDir(def)
+            if (dir.exists() && dir.isDirectory && dir.listFiles()?.isNotEmpty() == true) {
+                return ModelInstallState.Installed(dir.absolutePath)
+            }
+            val partial = partialFile(def)
+            if (partial.exists() && partial.length() in 1..<def.sizeBytes) {
+                return ModelInstallState.PartiallyDownloaded(partial.length(), def.sizeBytes)
+            }
+            return ModelInstallState.NotInstalled
+        }
+        // Single-file formats.
         val full = modelFile(def)
         if (full.exists() && full.length() == def.sizeBytes) {
             return ModelInstallState.Installed(full.absolutePath)
@@ -66,10 +83,11 @@ class ModelManager @Inject constructor(
     fun isInstalled(def: ModelDefinition): Boolean =
         stateOf(def) is ModelInstallState.Installed
 
-    /** Wipe a model from disk (both partial and full). */
+    /** Wipe a model from disk (file, partial, extracted dir). */
     fun delete(def: ModelDefinition) {
         modelFile(def).delete()
         partialFile(def).delete()
+        if (def.format.isArchive) extractDir(def).deleteRecursively()
     }
 
     /**
@@ -162,14 +180,20 @@ class ModelManager @Inject constructor(
 
                 trySend(ModelInstallState.Verifying)
 
-                val actualSha = digest.digest().joinToString("") { "%02x".format(it) }
-                if (!actualSha.equals(def.sha256, ignoreCase = true)) {
-                    partial.delete()
-                    trySend(ModelInstallState.Failed(
-                        "SHA-256 mismatch: expected ${def.sha256}, got $actualSha"
-                    ))
-                    close()
-                    return@use
+                // SHA-256 check is skipped when the registry left it blank (see
+                // VoiceModelRegistry KDoc — GitHub Releases don't publish
+                // authoritative hashes). HTTPS + completed-byte-count check
+                // already provide transport integrity.
+                if (def.sha256.isNotBlank()) {
+                    val actualSha = digest.digest().joinToString("") { "%02x".format(it) }
+                    if (!actualSha.equals(def.sha256, ignoreCase = true)) {
+                        partial.delete()
+                        trySend(ModelInstallState.Failed(
+                            "SHA-256 mismatch: expected ${def.sha256}, got $actualSha"
+                        ))
+                        close()
+                        return@use
+                    }
                 }
 
                 if (!partial.renameTo(final)) {
@@ -178,7 +202,23 @@ class ModelManager @Inject constructor(
                     return@use
                 }
 
-                Log.i(TAG, "installed ${def.id} -> ${final.absolutePath} (${final.length()} bytes, sha256 verified)")
+                // Archive formats (sherpa-onnx tar.bz2): extract next to the
+                // archive and remove the archive to free disk. The engines load
+                // their files from <modelsDir>/<extractDirName>/.
+                if (def.format.isArchive) {
+                    try {
+                        val extractTo = File(modelsDir, def.extractDirName)
+                        if (extractTo.exists()) extractTo.deleteRecursively()
+                        ArchiveExtractor.extractTarBz2(final, extractTo)
+                        final.delete()    // archive served its purpose
+                    } catch (t: Throwable) {
+                        trySend(ModelInstallState.Failed("extraction failed: ${t.message}", t))
+                        close()
+                        return@use
+                    }
+                }
+
+                Log.i(TAG, "installed ${def.id} -> ${final.absolutePath} (${if (def.sha256.isNotBlank()) "sha256 verified" else "size only"})")
                 trySend(ModelInstallState.Installed(final.absolutePath))
                 close()
             }

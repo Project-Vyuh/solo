@@ -95,6 +95,11 @@ dependencies {
     // building — see SOLO-VOICE.md §6.
     implementation(files("libs/sherpa-onnx-1.13.2.aar"))
 
+    // Apache Commons Compress — extract tar.bz2 voice model archives published
+    // by sherpa-onnx (Moonshine, Kokoro). Pulled in for Phase 1B; size impact
+    // ~1 MB. We use only the tar + bzip2 surfaces.
+    implementation(libs.commons.compress)
+
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.coroutines.test)

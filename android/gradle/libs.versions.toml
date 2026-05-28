@@ -15,6 +15,7 @@ ksp = "2.2.21-2.0.5"
 junit = "4.13.2"
 mockk = "1.13.13"
 litertlm = "0.12.0"
+commons-compress = "1.27.1"
 
 [libraries]
 core-ktx = { module = "androidx.core:core-ktx", version.ref = "core-ktx" }
@@ -52,6 +53,9 @@ mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 
 litertlm-android = { module = "com.google.ai.edge.litertlm:litertlm-android", version.ref = "litertlm" }
+
+# Apache Commons Compress — for extracting sherpa-onnx tar.bz2 voice model archives
+commons-compress = { module = "org.apache.commons:commons-compress", version.ref = "commons-compress" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
