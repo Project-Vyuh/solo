@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.projectvyuh.solo.domain.model.Conversation
 import dev.projectvyuh.solo.domain.model.Message
 import dev.projectvyuh.solo.domain.model.Role
+import dev.projectvyuh.solo.domain.persona.SoloSystemPrompt
 import dev.projectvyuh.solo.domain.repository.LlmRepository
 import dev.projectvyuh.solo.domain.usecase.GenerationEvent
 import dev.projectvyuh.solo.domain.usecase.SendMessageUseCase
@@ -31,17 +32,11 @@ data class ChatUiState(
     val error: String? = null,
 ) {
     companion object {
-        // Phase 1A system prompt — refined in Step 7. Kept short here so it
-        // doesn't dominate the early conversation. Persona shapes everything
-        // downstream so changes here have outsized impact.
+        // Single source of truth for Solo's prompt lives in SoloSystemPrompt.
+        // Built once at object init; rebuilt only when persona/phase changes.
         val SYSTEM_PROMPT = Message(
             role = Role.SYSTEM,
-            content = """
-                You are Solo, a personal AI agent that lives entirely on the user's phone.
-                You are private — no user data ever leaves this device.
-                You are helpful, concise, and direct. You speak naturally, not robotically.
-                You are currently in early development. Be honest about your current capabilities.
-            """.trimIndent(),
+            content = SoloSystemPrompt.build(),
         )
     }
 }

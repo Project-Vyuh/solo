@@ -32,8 +32,10 @@ data class ModelDefinition(
  * tokenizer-level special tokens that map to one of these formats.
  */
 enum class ChatTemplate {
-    /** Google Gemma format: `<start_of_turn>user\n...<end_of_turn>\n<start_of_turn>model\n` */
-    GEMMA,
+    /** Gemma 4 (March 2026+) — new control tokens: `<|turn>role\n...<turn|>`. */
+    GEMMA4,
+    /** Gemma 3 family — `<start_of_turn>role\n...<end_of_turn>`. */
+    GEMMA3,
     /** OpenAI / Qwen ChatML: `<|im_start|>role\n...<|im_end|>` */
     CHATML,
     /** Meta Llama 3: `<|start_header_id|>role<|end_header_id|>\n...<|eot_id|>` */

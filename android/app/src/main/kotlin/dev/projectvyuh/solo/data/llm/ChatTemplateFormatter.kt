@@ -28,27 +28,53 @@ object ChatTemplateFormatter {
      */
     fun format(conversation: Conversation, template: ChatTemplate): String =
         when (template) {
-            ChatTemplate.GEMMA  -> formatGemma(conversation)
+            ChatTemplate.GEMMA4 -> formatGemma4(conversation)
+            ChatTemplate.GEMMA3 -> formatGemma3(conversation)
             ChatTemplate.CHATML -> formatChatML(conversation)
             ChatTemplate.LLAMA3 -> formatLlama3(conversation)
             ChatTemplate.PHI    -> formatPhi(conversation)
         }
 
-    // --- Gemma ---------------------------------------------------------------
+    // --- Gemma 4 ------------------------------------------------------------
     //
-    // Gemma has no dedicated system role. The reference template folds any
-    // system message into the first user turn (separated by two newlines).
-    // BOS is added by the tokenizer (add_bos=true), so we do NOT prepend <bos>.
+    // Gemma 4 introduced new control tokens. Per Google's prompt-formatting
+    // docs (ai.google.dev/gemma/docs/core/prompt-formatting-gemma4):
     //
-    // Format:
+    //   <|turn>system
+    //   {system}<turn|>
+    //   <|turn>user
+    //   {user}<turn|>
+    //   <|turn>model
+    //   {model}<turn|>
+    //
+    // Unlike Gemma 3, Gemma 4 has a true `system` role — no need to fold the
+    // system message into the first user turn.
+    //
+    // BOS is added by the tokenizer (add_bos=true). The trailing `<|turn>model`
+    // opens the assistant's reply so the next sampled token is the start.
+    private fun formatGemma4(conversation: Conversation): String {
+        val sb = StringBuilder()
+        for (m in conversation.messages) {
+            val tag = when (m.role) {
+                Role.SYSTEM    -> "system"
+                Role.USER      -> "user"
+                Role.ASSISTANT -> "model"
+                Role.TOOL      -> continue   // not used in Phase 1A
+            }
+            sb.append("<|turn>").append(tag).append("\n")
+              .append(m.content).append("<turn|>\n")
+        }
+        sb.append("<|turn>model\n")
+        return sb.toString()
+    }
+
+    // --- Gemma 3 (retained for fallback / legacy GGUFs) ---------------------
+    //
     //   <start_of_turn>user
     //   {system}\n\n{user_1}<end_of_turn>
     //   <start_of_turn>model
     //   {assistant_1}<end_of_turn>
-    //   <start_of_turn>user
-    //   {user_2}<end_of_turn>
-    //   <start_of_turn>model
-    private fun formatGemma(conversation: Conversation): String {
+    private fun formatGemma3(conversation: Conversation): String {
         val sb = StringBuilder()
         val (system, rest) = conversation.messages.partition { it.role == Role.SYSTEM }
         val systemPrefix = system.joinToString("\n\n") { it.content }
@@ -68,7 +94,7 @@ object ChatTemplateFormatter {
                     sb.append("<start_of_turn>model\n")
                       .append(m.content).append("<end_of_turn>\n")
                 }
-                else -> {} // SYSTEM handled above; TOOL not used in Phase 1A
+                else -> {}
             }
         }
         sb.append("<start_of_turn>model\n")
@@ -76,12 +102,6 @@ object ChatTemplateFormatter {
     }
 
     // --- ChatML (Qwen, OpenAI-derivative) -----------------------------------
-    //
-    // <|im_start|>system
-    // {system}<|im_end|>
-    // <|im_start|>user
-    // {user}<|im_end|>
-    // <|im_start|>assistant
     private fun formatChatML(conversation: Conversation): String {
         val sb = StringBuilder()
         for (m in conversation.messages) {
@@ -99,14 +119,6 @@ object ChatTemplateFormatter {
     }
 
     // --- Llama 3 -------------------------------------------------------------
-    //
-    // <|begin_of_text|><|start_header_id|>system<|end_header_id|>
-    //
-    // {system}<|eot_id|><|start_header_id|>user<|end_header_id|>
-    //
-    // {user}<|eot_id|><|start_header_id|>assistant<|end_header_id|>
-    //
-    // BOS (<|begin_of_text|>) is added by the tokenizer, so omitted here.
     private fun formatLlama3(conversation: Conversation): String {
         val sb = StringBuilder()
         for (m in conversation.messages) {
@@ -124,8 +136,6 @@ object ChatTemplateFormatter {
     }
 
     // --- Phi -----------------------------------------------------------------
-    //
-    // <|system|>\n{system}<|end|>\n<|user|>\n{user}<|end|>\n<|assistant|>\n
     private fun formatPhi(conversation: Conversation): String {
         val sb = StringBuilder()
         for (m in conversation.messages) {
