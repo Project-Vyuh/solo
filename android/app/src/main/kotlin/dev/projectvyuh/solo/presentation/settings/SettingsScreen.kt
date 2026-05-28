@@ -88,7 +88,7 @@ fun SettingsScreen(
 
         item {
             SettingCard(title = "Build") {
-                InfoRow("Native", state.nativeVersion.ifEmpty { "—" })
+                InfoRow("Inference backend", state.backend.name)
                 InfoRow("App", "0.0.1")
             }
         }

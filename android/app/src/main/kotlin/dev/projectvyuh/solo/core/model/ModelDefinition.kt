@@ -16,30 +16,26 @@ data class ModelDefinition(
     val parameterCount: String,
     val contextWindow: Int,
     val quantization: String,
-    val chatTemplate: ChatTemplate,
+    val format: ModelFormat,
     val isMultimodal: Boolean = false,
 ) {
-    /** The on-disk filename used when the GGUF is fully downloaded and verified. */
-    val fileName: String get() = "$id.gguf"
+    /** The on-disk filename used when the model is fully downloaded and verified. */
+    val fileName: String get() = "$id.${format.extension}"
 
     /** Partial download filename — atomically renamed to [fileName] on SHA-256 success. */
-    val partialFileName: String get() = "$id.gguf.part"
+    val partialFileName: String get() = "$id.${format.extension}.part"
 }
 
 /**
- * Chat template format. Determines how a conversation is serialized into the
- * single string the model sees during inference. Each model family ships
- * tokenizer-level special tokens that map to one of these formats.
+ * The runtime model format. Each format implies a different inference engine.
+ *
+ * - [LITERTLM]: Google AI Edge LiteRT-LM `.litertlm` files. Tokenizer, weights,
+ *               and chat template are bundled. The engine handles formatting
+ *               internally; we do NOT format prompts manually.
+ * - [GGUF]:     Legacy llama.cpp format. Kept in the enum for institutional
+ *               history but no longer used by Solo as of 2026-05-28.
  */
-enum class ChatTemplate {
-    /** Gemma 4 (March 2026+) — new control tokens: `<|turn>role\n...<turn|>`. */
-    GEMMA4,
-    /** Gemma 3 family — `<start_of_turn>role\n...<end_of_turn>`. */
-    GEMMA3,
-    /** OpenAI / Qwen ChatML: `<|im_start|>role\n...<|im_end|>` */
-    CHATML,
-    /** Meta Llama 3: `<|start_header_id|>role<|end_header_id|>\n...<|eot_id|>` */
-    LLAMA3,
-    /** Microsoft Phi: `<|system|>\n...<|end|>\n<|user|>\n...<|end|>\n<|assistant|>\n` */
-    PHI,
+enum class ModelFormat(val extension: String) {
+    LITERTLM("litertlm"),
+    GGUF("gguf"),
 }

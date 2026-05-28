@@ -28,14 +28,13 @@ object SoloSystemPrompt {
 
     fun build(persona: SoloPersona = SoloPersona.Current): String = buildString {
 
-        // --- Thinking-mode activation (Gemma 4 control token) ----------------
-        // Per Google's Gemma 4 docs (ai.google.dev/gemma/docs/capabilities/thinking),
-        // including the <|think|> token in the system instruction tells the model
-        // to engage extended reasoning. The model then emits its thoughts in
-        // <|channel>thought ... <channel|> blocks, which ThinkingParser separates
-        // from the user-facing answer.
-        appendLine("<|think|>")
-        appendLine()
+        // NOTE on thinking mode: earlier drafts included a literal <|think|>
+        // line here based on Google's marketing docs. That token is NOT in
+        // the Gemma 4 GGUF's special-token table (llama.cpp recognizes only
+        // the established <start_of_turn>/<end_of_turn> Gemma template). The
+        // literal string would be tokenized as random text and confuse the
+        // model. Removed. We instead instruct CoT in natural language below
+        // and let the model emit <think>...</think> voluntarily if it wants.
 
         // --- Identity --------------------------------------------------------
         appendLine("# You are ${persona.name}")

@@ -3,23 +3,30 @@ package dev.projectvyuh.solo.data.llm
 import dev.projectvyuh.solo.core.model.ModelDefinition
 import dev.projectvyuh.solo.core.model.ModelManager
 import dev.projectvyuh.solo.domain.model.Conversation
+import dev.projectvyuh.solo.domain.model.Role
+import dev.projectvyuh.solo.domain.persona.SoloSystemPrompt
 import dev.projectvyuh.solo.domain.repository.LlmRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Backs [LlmRepository] with [LlamaCppEngine].
+ * Backs [LlmRepository] with [LiteRtLmEngine].
  *
- * Responsibilities:
- *   - Resolve the GGUF path via [ModelManager] (refuses to load a model that
- *     isn't fully installed and verified).
- *   - Apply the correct chat template for the active model.
- *   - Pick sensible default sampling params per request.
+ * Key differences vs the prior llama.cpp implementation:
+ *  - No prompt formatting here. LiteRT-LM's `Conversation` accepts the user's
+ *    raw message and applies the model's bundled chat template internally.
+ *    Our [SoloSystemPrompt] becomes the `systemInstruction` on the
+ *    Conversation at load time.
+ *  - Multi-turn context (the running KV cache) lives inside LiteRT-LM's
+ *    Conversation, so we only forward the *latest* user message — not the
+ *    full Conversation domain object.
+ *  - Sampling params are configured once on the Conversation; per-call
+ *    parameter overrides are deferred to a future API surface.
  */
 @Singleton
 class LlmRepositoryImpl @Inject constructor(
-    private val engine: LlamaCppEngine,
+    private val engine: LiteRtLmEngine,
     private val modelManager: ModelManager,
 ) : LlmRepository {
 
@@ -33,14 +40,10 @@ class LlmRepositoryImpl @Inject constructor(
             "model ${model.id} is not installed; download it via ModelManager first"
         }
         val path = modelManager.modelFile(model).absolutePath
-        // Threading: pick conservative defaults. On flagship Snapdragon 8 Gen 3+
-        // we have 4-8 perf cores. 4 threads is a safe default that avoids
-        // saturating little cores (which would thrash thermals).
         engine.load(
-            path        = path,
-            contextSize = model.contextWindow.coerceAtMost(8192),  // start moderate; can raise later
-            threadCount = 4,
-            gpuLayers   = 0,
+            modelPath         = path,
+            preferredBackend  = LiteRtLmEngine.BackendType.GPU,
+            systemInstruction = SoloSystemPrompt.build(),
         )
         loaded = model
     }
@@ -51,10 +54,20 @@ class LlmRepositoryImpl @Inject constructor(
     }
 
     override fun generate(conversation: Conversation): Flow<String> {
-        val model = loaded ?: error("no model loaded")
-        val prompt = ChatTemplateFormatter.format(conversation, model.chatTemplate)
-        return engine.complete(prompt, SamplingParams())
+        check(loaded != null) { "no model loaded" }
+        // LiteRT-LM Conversation maintains its own KV cache across turns, so
+        // we only forward the LATEST user message. If conversation history
+        // diverges (e.g., regenerate, edit, branch), call
+        // [LiteRtLmEngine.resetConversation] and replay — handled in a future
+        // patch when those features land.
+        val lastUser = conversation.messages.lastOrNull { it.role == Role.USER }
+            ?: error("no user message to respond to")
+        return engine.complete(lastUser.content)
     }
 
-    override fun abort() = engine.abort()
+    override fun abort() {
+        // LiteRT-LM 0.12.0 doesn't expose a public cancel hook. Cancelling the
+        // collecting coroutine is sufficient — the Flow stops emitting and
+        // the SDK's internal generation winds down at the next token boundary.
+    }
 }

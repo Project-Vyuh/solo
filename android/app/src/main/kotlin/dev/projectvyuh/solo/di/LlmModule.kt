@@ -10,7 +10,7 @@ import okhttp3.OkHttpClient
 import javax.inject.Singleton
 
 /**
- * Hilt providers for the LLM stack. [LlamaCppEngine] and [ModelManager]
+ * Hilt providers for the LLM stack. [LiteRtLmEngine] and [ModelManager]
  * are themselves @Singleton-annotated with @Inject constructors, so they
  * are discovered automatically; this module only needs to provide the
  * external dependencies they take.

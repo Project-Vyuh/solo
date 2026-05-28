@@ -7,7 +7,7 @@ import dev.projectvyuh.solo.core.model.ModelDefinition
 import dev.projectvyuh.solo.core.model.ModelManager
 import dev.projectvyuh.solo.core.model.ModelRegistry
 import dev.projectvyuh.solo.core.thermal.ThermalMonitor
-import dev.projectvyuh.solo.data.llm.LlamaCppEngine
+import dev.projectvyuh.solo.data.llm.LiteRtLmEngine
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,13 +20,13 @@ data class SettingsUiState(
     val modelInstalled: Boolean = false,
     val modelSizeBytes: Long = 0L,
     val thermal: ThermalMonitor.Level = ThermalMonitor.Level.NONE,
-    val nativeVersion: String = "",
+    val backend: LiteRtLmEngine.BackendType = LiteRtLmEngine.BackendType.UNINITIALIZED,
 )
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val modelManager: ModelManager,
-    private val engine: LlamaCppEngine,
+    private val engine: LiteRtLmEngine,
     thermalMonitor: ThermalMonitor,
 ) : ViewModel() {
 
@@ -36,7 +36,7 @@ class SettingsViewModel @Inject constructor(
             modelInstalled = modelManager.isInstalled(ModelRegistry.primary),
             modelSizeBytes = modelManager.modelFile(ModelRegistry.primary).takeIf { it.exists() }?.length() ?: 0,
             thermal        = thermalMonitor.currentLevel(),
-            nativeVersion  = runCatching { engine.nativeVersion() }.getOrDefault(""),
+            backend        = engine.backend,
         )
     )
     val state: StateFlow<SettingsUiState> = _state.asStateFlow()
