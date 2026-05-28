@@ -88,6 +88,13 @@ dependencies {
     // via .litertlm model files from huggingface.co/litert-community.
     implementation(libs.litertlm.android)
 
+    // sherpa-onnx — Solo's voice runtime. Supports Moonshine STT, Kokoro TTS,
+    // Silero VAD, and openWakeWord in one AAR. Distributed via GitHub releases
+    // (no Maven artifact). Developer must download `sherpa-onnx-1.13.2.aar`
+    // from github.com/k2-fsa/sherpa-onnx/releases into `app/libs/` before
+    // building — see SOLO-VOICE.md §6.
+    implementation(files("libs/sherpa-onnx-1.13.2.aar"))
+
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.coroutines.test)

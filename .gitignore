@@ -32,6 +32,9 @@ Thumbs.db
 # Claude Code project data
 .claude/
 
+# Binary libraries downloaded at setup time (not committed; size + license reasons)
+android/app/libs/
+
 # Android build outputs
 android/build/
 android/app/build/
