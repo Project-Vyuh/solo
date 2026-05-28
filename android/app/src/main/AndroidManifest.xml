@@ -9,6 +9,13 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 
+    <!-- Phase 1B voice: microphone capture for STT.
+         Tap-to-speak in 1B initial; always-on wake word in 1B.2 uses the
+         FOREGROUND_SERVICE_MICROPHONE permission below. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+
     <application
         android:name=".SoloApp"
         android:allowBackup="false"
